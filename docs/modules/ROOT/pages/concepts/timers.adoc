@@ -1,24 +1,27 @@
 [[timers]]
 = Timers
 
-Timers are intended for measuring short-duration latencies and the frequency of such events. All implementations of `Timer` report at least the total time and the count of events as separate time series but other time series can also be reported depending on what is supported by the backend (max, percentiles, histograms). While you can use timers for other use cases, note that negative values are not supported, and recording many longer durations could cause overflow of the total time at `Long.MAX_VALUE` nanoseconds (292.3 years).
+* Timers
+    ** goal
+        *** measure short-duration latencies & frequency of such events
+    ** ALL implementations of `Timer` -- report -- the
+        *** total time
+        *** count of events -- as -- separate time series (OTHER time series can also be reported)
+    ** values
+        *** negative values NOT supported
+        *** `Long.MAX_VALUE` nanoseconds (292.3 years)
+            **** if it's close to it -> can cause overflow
+    ** base unit -- `TimeUnit` --
+        *** -- depends on -- metrics backend
+        *** required | interacting with `Timer` implementations
+            **** == Micrometer publishes your timing | appropriate base unit
 
-As an example, consider a graph showing request latency to a typical web server. The server can be expected to respond to many requests quickly, so the timer gets updated many times per second.
-
-The appropriate base unit for timers varies by metrics backend, and for good reason. Micrometer is decidedly un-opinionated about this. However, because of the potential for confusion, Micrometer requires a `TimeUnit` when interacting with `Timer` implementations. Micrometer is aware of the preferences of each implementation and publishes your timing in the appropriate base unit, based on the implementation. The following listing shows part of the `Timer` interface:
-
-[source,java]
-----
-public interface Timer extends Meter {
-    ...
-    void record(long amount, TimeUnit unit);
-    void record(Duration duration);
-    double totalTime(TimeUnit unit);
-}
-----
-
-The interface contains a fluent builder for timers:
-
+* _Examples:_
+    ** _Example1:_ graph / shows request latency | typical web server
+        *** server -- can be expected to respond to -- MANY requests quickly
+            **** timer gets updated many times / 1"
+    ** _Example2:_ fluent builder for timers
++
 [source,java]
 ----
 Timer timer = Timer
@@ -28,6 +31,7 @@ Timer timer = Timer
     .register(registry);
 ----
 
+* TODO:
 NOTE: The maximum statistical value for basic `Timer` implementations, such as `CumulativeTimer` and `StepTimer`, is a time window maximum (`TimeWindowMax`).
 It means that its value is the maximum value during a time window.
 If no new values are recorded for the time window length, the max is reset to 0 as a new time window starts.
